@@ -3,359 +3,708 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VoiceMate AI – Intelligent Multilingual Voice Assistant</title>
+  <title>VoiceMate AI — Commercial Voice Intelligence Platform</title>
+  
+  <!-- Inter Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Cache Busting Asset Links -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.4.5">
 </head>
 <body>
-  <div class="app-wrapper">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="brand-section">
-        <div class="brand-logo-glow">
-          <svg class="logo-icon" viewBox="0 0 24 24">
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-          </svg>
+  <div class="app-shell">
+    
+    <!-- ====================================================================
+         LEFT SIDEBAR
+         ==================================================================== -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <a href="#overview" class="brand-badge">
+          <div class="brand-icon">
+            <i data-lucide="audio-waveform"></i>
+          </div>
+          <div class="brand-name">
+            VoiceMate <span class="brand-tier">AI</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Workspace</div>
+        
+        <a class="nav-item active" data-view="overview">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Overview</span>
+        </a>
+        
+        <a class="nav-item" data-view="studio">
+          <i data-lucide="mic"></i>
+          <span>Speech Studio</span>
+          <span class="nav-badge">STT</span>
+        </a>
+        
+        <a class="nav-item" data-view="assistant">
+          <i data-lucide="sparkles"></i>
+          <span>AI Assistant</span>
+          <span class="nav-badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">Groq</span>
+        </a>
+        
+        <a class="nav-item" data-view="generator">
+          <i data-lucide="volume-2"></i>
+          <span>Voice Generator</span>
+          <span class="nav-badge">TTS</span>
+        </a>
+        
+        <div class="nav-section-title" style="margin-top: 12px;">Management</div>
+        
+        <a class="nav-item" data-view="history">
+          <i data-lucide="history"></i>
+          <span>Activity History</span>
+          <span class="nav-badge" id="sidebar-history-count">0</span>
+        </a>
+        
+        <a class="nav-item" data-view="settings">
+          <i data-lucide="settings-2"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-card">
+          <div class="status-indicator">
+            <span class="status-dot" id="sidebar-status-dot"></span>
+            <span id="sidebar-status-text">Checking API...</span>
+          </div>
+          <i data-lucide="shield-check" style="width: 14px; height: 14px; color: var(--text-tertiary);"></i>
         </div>
-        <div>
-          <h1 class="brand-title">VoiceMate AI</h1>
-          <p class="brand-subtitle">Intelligent Multilingual Voice Assistant powered by Gnani.ai</p>
+        
+        <div class="version-info">
+          <span>Gnani.ai Stack</span>
+          <span style="font-family: var(--font-mono);">v2.4.0-prod</span>
         </div>
       </div>
-      <div class="header-status-badge">
-        <span class="status-dot" id="api-status-dot"></span>
-        <span id="api-status-text">Checking API...</span>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN CONTENT AREA
+         ==================================================================== -->
+    <main class="app-main">
+      
+      <!-- Top Application Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="btn-mobile-menu" id="btn-toggle-sidebar" title="Toggle Navigation">
+            <i data-lucide="menu"></i>
+          </button>
+          
+          <div class="breadcrumb">
+            <span class="breadcrumb-root">VoiceMate</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current" id="header-breadcrumb-title">Overview</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="api-pill" id="header-api-pill">
+            <span class="dot"></span>
+            <span id="header-api-status-label">Verifying API Gateway</span>
+          </div>
+          
+          <div class="user-profile">
+            <div class="user-avatar" title="VoiceMate Operator">VM</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Viewport Views Container -->
+      <div class="content-viewport">
+        
+        <!-- ================================================================
+             VIEW 1: OVERVIEW DASHBOARD
+             ================================================================ -->
+        <section class="view-pane active" id="view-overview">
+          <div class="hero-banner">
+            <div class="hero-content">
+              <div class="hero-tag">
+                <i data-lucide="zap" style="width: 13px; height: 13px;"></i>
+                Enterprise Speech Intelligence
+              </div>
+              <h1 class="hero-title">Your Voice. Your Intelligence.</h1>
+              <p class="hero-desc">
+                Experience intelligent multilingual communication powered by Gnani AI's state-of-the-art speech recognition, natural voice synthesis, and reasoning architecture.
+              </p>
+              <div class="hero-actions">
+                <button class="btn-solid-primary" id="btn-start-voice-session">
+                  <i data-lucide="play" style="width: 16px; height: 16px;"></i>
+                  Start Voice Session
+                </button>
+                <button class="btn-ghost" id="btn-quick-tts-nav">
+                  <i data-lucide="volume-2" style="width: 15px; height: 15px;"></i>
+                  Generate Speech
+                </button>
+              </div>
+            </div>
+
+            <!-- Abstract Waveform Graphic -->
+            <div class="hero-visual">
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+              <div class="hero-wave"></div>
+            </div>
+          </div>
+
+          <!-- Model Information Cards -->
+          <div class="models-grid">
+            <!-- Prisma Card -->
+            <div class="model-card">
+              <div class="model-card-header">
+                <div class="model-badge-icon">
+                  <i data-lucide="mic"></i>
+                </div>
+                <span class="model-status-tag" id="overview-prisma-badge">
+                  <span class="status-dot"></span> Checking
+                </span>
+              </div>
+              <div class="model-name">Prisma STT</div>
+              <div class="model-capability">Speech Recognition &amp; Transcription</div>
+              <p class="model-desc">
+                High-accuracy ASR optimized for English and 9 Indian languages. Supports continuous verbatim transcription, code-mixing, and automatic language detection.
+              </p>
+              <div class="model-footer-action">
+                <small id="overview-prisma-endpoint">Endpoint: POST /stt/v3</small>
+                <button class="btn-ghost" data-navigate="studio" style="padding: 4px 8px; font-size: 12px;">Launch</button>
+              </div>
+            </div>
+
+            <!-- Timbre Card -->
+            <div class="model-card">
+              <div class="model-card-header">
+                <div class="model-badge-icon">
+                  <i data-lucide="volume-2"></i>
+                </div>
+                <span class="model-status-tag" id="overview-timbre-badge">
+                  <span class="status-dot"></span> Checking
+                </span>
+              </div>
+              <div class="model-name">Timbre TTS</div>
+              <div class="model-capability">Natural Voice Synthesis</div>
+              <p class="model-desc">
+                Low-latency conversational speech synthesis across 13 expressive Indian-accented voices with custom speed adjustment and native 16kHz WAV container rendering.
+              </p>
+              <div class="model-footer-action">
+                <small id="overview-timbre-endpoint">Endpoint: POST /api/v1/tts/inference</small>
+                <button class="btn-ghost" data-navigate="generator" style="padding: 4px 8px; font-size: 12px;">Launch</button>
+              </div>
+            </div>
+
+            <!-- VoiceMate AI Assistant Card -->
+            <div class="model-card">
+              <div class="model-card-header">
+                <div class="model-badge-icon">
+                  <i data-lucide="brain"></i>
+                </div>
+                <span class="model-status-tag" id="overview-evon-badge">
+                  <span class="status-dot"></span> Checking
+                </span>
+              </div>
+              <div class="model-name">VoiceMate AI Assistant</div>
+              <div class="model-capability">Conversational Intelligence &amp; Reasoning</div>
+              <p class="model-desc">
+                High-speed conversational intelligence powered by Groq's low-latency OpenAI-compatible infrastructure. Context-aware for questions, translations, and voice script generation.
+              </p>
+              <div class="model-footer-action">
+                <small id="overview-evon-endpoint">Provider: Groq LPU™ Engine</small>
+                <button class="btn-ghost" data-navigate="assistant" style="padding: 4px 8px; font-size: 12px;">Chat</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lower Section: Quick Actions & Recent Activity -->
+          <div class="overview-lower-grid">
+            <div class="panel-card">
+              <div class="panel-header">
+                <span class="panel-title">Recent Session Operations</span>
+                <button class="btn-ghost" data-navigate="history" style="font-size: 12px; padding: 4px 10px;">View Full History</button>
+              </div>
+              <div id="overview-recent-list">
+                <p style="text-align: center; padding: 32px 0; color: var(--text-tertiary); font-style: italic;">
+                  No operations recorded yet in this session. Start by transcribing audio or synthesizing speech.
+                </p>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-header">
+                <span class="panel-title">Quick Studio Actions</span>
+              </div>
+              <div class="quick-actions-list">
+                <button class="quick-action-btn" data-navigate="studio">
+                  <div class="quick-action-left">
+                    <i data-lucide="upload" style="width: 16px; height: 16px; color: var(--accent-primary);"></i>
+                    <span>Upload &amp; Transcribe Audio</span>
+                  </div>
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--text-tertiary);"></i>
+                </button>
+                <button class="quick-action-btn" data-navigate="generator">
+                  <div class="quick-action-left">
+                    <i data-lucide="mic-vocal" style="width: 16px; height: 16px; color: var(--accent-secondary);"></i>
+                    <span>Synthesize Conversational Speech</span>
+                  </div>
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--text-tertiary);"></i>
+                </button>
+                <button class="quick-action-btn" data-navigate="assistant">
+                  <div class="quick-action-left">
+                    <i data-lucide="bot" style="width: 16px; height: 16px; color: var(--accent-cyan);"></i>
+                    <span>Prompt VoiceMate AI Assistant</span>
+                  </div>
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--text-tertiary);"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 2: SPEECH STUDIO (PRISMA STT WORKSPACE)
+             ================================================================ -->
+        <section class="view-pane" id="view-studio">
+          <div class="page-header">
+            <h1 class="page-header-title">Speech Studio</h1>
+            <p class="page-header-desc">
+              Convert your audio recordings into accurate multilingual text using Gnani Prisma speech models.
+            </p>
+          </div>
+
+          <div class="studio-grid">
+            <!-- Left Column: Audio Upload & Configuration -->
+            <div class="upload-panel">
+              <input type="file" id="studio-audio-input" accept=".wav,.mp3,.ogg,.flac,.m4a,.webm" style="display: none;">
+
+              <!-- Drag and Drop Dropzone -->
+              <div class="dropzone-commercial" id="studio-dropzone">
+                <div class="dropzone-icon-circle">
+                  <i data-lucide="upload-cloud" style="width: 26px; height: 26px;"></i>
+                </div>
+                <div class="dropzone-title">Click to upload or drag &amp; drop audio</div>
+                <div class="dropzone-hint">Supported formats: WAV, MP3, OGG, FLAC, M4A (Max 25 MB)</div>
+              </div>
+
+              <!-- Selected File Card (Hidden until selected) -->
+              <div class="file-card-preview" id="studio-file-card" style="display: none;">
+                <div class="file-card-meta">
+                  <div class="file-icon-box">
+                    <i data-lucide="file-audio" style="width: 18px; height: 18px;"></i>
+                  </div>
+                  <div>
+                    <div class="file-name-text" id="studio-file-name">recording.wav</div>
+                    <div class="file-size-text" id="studio-file-size">0 KB</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn-ghost" id="btn-studio-remove-file" title="Remove Audio" style="padding: 6px;">
+                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Audio Preview Player (revealed when file chosen) -->
+              <div id="studio-audio-preview-container" style="display: none;">
+                <audio id="studio-audio-preview" class="audio-preview-element" controls></audio>
+              </div>
+
+              <!-- Transcription Settings -->
+              <div class="panel-card" style="padding: 20px;">
+                <div style="font-size: 13.5px; font-weight: 600; margin-bottom: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="sliders" style="width: 14px; height: 14px; color: var(--accent-primary);"></i>
+                  Acoustic &amp; Recognition Parameters
+                </div>
+                
+                <div class="config-group-grid">
+                  <div class="field-wrapper">
+                    <label class="field-label" for="studio-model">Prisma Model Engine</label>
+                    <select class="select-commercial" id="studio-model">
+                      <option value="prisma-v2.5" selected>Prisma v2.5 (Stable / Continuous)</option>
+                      <option value="prisma-v3.0">Prisma v3.0 (Indic / Word Boost)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="field-wrapper">
+                    <label class="field-label" for="studio-lang">Target Language Hint</label>
+                    <select class="select-commercial" id="studio-lang">
+                      <option value="en-IN" selected>English (en-IN)</option>
+                      <option value="indic-auto">Automatic Indic Detection (indic-auto)</option>
+                      <option value="hi-IN">Hindi (hi-IN)</option>
+                      <option value="ta-IN">Tamil (ta-IN)</option>
+                      <option value="te-IN">Telugu (te-IN)</option>
+                      <option value="kn-IN">Kannada (kn-IN)</option>
+                      <option value="bn-IN">Bengali (bn-IN)</option>
+                      <option value="mr-IN">Marathi (mr-IN)</option>
+                      <option value="gu-IN">Gujarati (gu-IN)</option>
+                      <option value="ml-IN">Malayalam (ml-IN)</option>
+                      <option value="pa-IN">Punjabi (pa-IN)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="config-group-grid" style="margin-top: 14px;">
+                  <div class="field-wrapper">
+                    <label class="field-label" for="studio-format">Output Format</label>
+                    <select class="select-commercial" id="studio-format">
+                      <option value="transcribe" selected>Transcribe (Clean text with ITN)</option>
+                      <option value="verbatim">Verbatim (Exact with filler words)</option>
+                      <option value="codemix">Code-mix (Native script retention)</option>
+                      <option value="transliterate">Transliterate (Latin characters)</option>
+                    </select>
+                  </div>
+
+                  <div class="field-wrapper">
+                    <label class="field-label" for="studio-keyterms">Word Boost / Keyterms (v3.0)</label>
+                    <input type="text" class="input-commercial" id="studio-keyterms" placeholder="e.g. VoiceMate AI, Gnani, Timbre">
+                  </div>
+                </div>
+
+                <button class="btn-solid-primary" id="btn-studio-transcribe" disabled style="width: 100%; margin-top: 18px;">
+                  <i data-lucide="sparkles" style="width: 15px; height: 15px;"></i>
+                  <span>Transcribe Audio with Prisma</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Column: Result Editor Workspace -->
+            <div class="editor-panel">
+              <div class="editor-toolbar">
+                <div class="toolbar-status">
+                  <span class="status-dot" id="studio-result-dot" style="background: var(--text-tertiary);"></span>
+                  <span id="studio-result-status-text">Awaiting audio input</span>
+                </div>
+                <div class="toolbar-actions">
+                  <button class="btn-ghost" id="btn-studio-toggle-edit" style="display: none;">
+                    <i data-lucide="edit-3" style="width: 13px; height: 13px;"></i>
+                    <span>Edit</span>
+                  </button>
+                  <button class="btn-ghost" id="btn-studio-revert" style="display: none;" title="Revert to original API output">
+                    <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
+                    <span>Revert</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="editor-body">
+                <div class="transcript-viewport empty" id="studio-transcript-display">
+                  Select an audio file on the left and run transcription to view results here.
+                </div>
+                <textarea class="textarea-commercial" id="studio-transcript-edit" style="display: none; height: 100%; min-height: 280px;"></textarea>
+              </div>
+
+              <div class="editor-footer">
+                <div style="font-size: 12px; color: var(--text-tertiary);" id="studio-result-meta">
+                  Ready
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn-ghost" id="btn-studio-copy" style="display: none;">
+                    <i data-lucide="copy" style="width: 13px; height: 13px;"></i>
+                    <span>Copy</span>
+                  </button>
+                  <button class="btn-ghost" id="btn-studio-download" style="display: none;">
+                    <i data-lucide="download" style="width: 13px; height: 13px;"></i>
+                    <span>Download .txt</span>
+                  </button>
+                  <button class="btn-ghost" id="btn-studio-to-ai" style="display: none;">
+                    <i data-lucide="bot" style="width: 13px; height: 13px;"></i>
+                    <span>Send to AI ➔</span>
+                  </button>
+                  <button class="btn-ghost" id="btn-studio-to-tts" style="display: none;">
+                    <i data-lucide="volume-2" style="width: 13px; height: 13px;"></i>
+                    <span>Speak (TTS) ➔</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 3: AI ASSISTANT (CONVERSATIONAL WORKSPACE)
+             ================================================================ -->
+        <section class="view-pane" id="view-assistant">
+          <div class="assistant-workspace">
+            
+            <!-- Conversation Thread -->
+            <div class="chat-thread-container" id="chat-thread">
+              <!-- Empty state welcome -->
+              <div class="chat-empty-state" id="chat-empty-state">
+                <div class="chat-empty-icon">
+                  <i data-lucide="sparkles" style="width: 26px; height: 26px;"></i>
+                </div>
+                <h2 class="chat-empty-title">VoiceMate AI Assistant</h2>
+                <p class="chat-empty-desc">
+                  Ask questions, summarize transcribed speech, or brainstorm multilingual voice scripts with automatic voice explanations.
+                </p>
+
+                <div class="prompt-suggestions-grid">
+                  <div class="suggestion-card" data-prompt="Explain artificial intelligence in simple English.">
+                    <strong>AI Fundamentals</strong>
+                    <div>"Explain artificial intelligence in simple English."</div>
+                  </div>
+                  <div class="suggestion-card" data-prompt="Summarize the core benefits of using Gnani Prisma for Indian speech recognition.">
+                    <strong>Speech Recognition</strong>
+                    <div>"Summarize the core benefits of using Gnani Prisma..."</div>
+                  </div>
+                  <div class="suggestion-card" data-prompt="Translate and explain code-mixing concepts across Hindi and English in customer support.">
+                    <strong>Multilingual AI</strong>
+                    <div>"Explain code-mixing concepts across Hindi and English..."</div>
+                  </div>
+                  <div class="suggestion-card" data-prompt="Draft a natural welcoming greeting for VoiceMate AI voice assistant.">
+                    <strong>Voice Scripts</strong>
+                    <div>"Draft a natural welcoming greeting for VoiceMate AI..."</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Composer Bar with Integrated Voice Controls -->
+            <div class="chat-composer-box">
+              <div class="composer-voice-toolbar" id="composer-voice-toolbar">
+                <div class="voice-toolbar-left">
+                  <label class="voice-toggle-pill" for="voice-responses-toggle" title="Enable or disable voice audio generation">
+                    <input type="checkbox" id="voice-responses-toggle" checked>
+                    <i data-lucide="mic" style="width: 13px; height: 13px;"></i>
+                    <span>Voice Responses</span>
+                  </label>
+
+                  <label class="voice-toggle-pill" for="voice-autoplay-toggle" title="Automatically start speaking when audio is ready">
+                    <input type="checkbox" id="voice-autoplay-toggle" checked>
+                    <i data-lucide="volume-2" style="width: 13px; height: 13px;"></i>
+                    <span>Auto-Play</span>
+                  </label>
+                </div>
+
+                <div class="voice-toolbar-right">
+                  <label for="voice-speaker-select" style="font-size: 11.5px; color: var(--text-tertiary); margin-right: 4px;">Speaker:</label>
+                  <select class="select-commercial select-compact" id="voice-speaker-select">
+                    <option value="Avinash" selected>Avinash (Expressive Male)</option>
+                    <option value="Chetana">Chetana (Expressive Female)</option>
+                    <option value="Lakshmi">Lakshmi (Expressive Female)</option>
+                    <option value="Devansh">Devansh (Expressive Male)</option>
+                    <option value="Prakash">Prakash (Expressive Male)</option>
+                    <option value="Shivani">Shivani (Expressive Female)</option>
+                    <option value="Pranav">Pranav (Standard Male)</option>
+                    <option value="Nalini">Nalini (Standard Female)</option>
+                  </select>
+                </div>
+              </div>
+
+              <textarea class="chat-input-textarea" id="chat-user-input" placeholder="Ask VoiceMate AI anything, or send text from Speech Studio..." rows="1"></textarea>
+              
+              <div class="chat-composer-footer">
+                <div style="font-size: 11.5px; color: var(--text-tertiary); display: flex; align-items: center; gap: 6px;" id="chat-endpoint-indicator">
+                  <span class="status-dot active" style="width: 6px; height: 6px;"></span>
+                  <span>Groq AI + Gnani Timbre</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn-ghost" id="btn-chat-clear" title="Clear Conversation" style="padding: 6px 10px;">
+                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                  </button>
+                  <button class="btn-solid-primary" id="btn-chat-send" style="padding: 7px 14px;">
+                    <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+                    <span>Send</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 4: VOICE GENERATOR (TIMBRE TTS STUDIO)
+             ================================================================ -->
+        <section class="view-pane" id="view-generator">
+          <div class="page-header">
+            <h1 class="page-header-title">Voice Generator</h1>
+            <p class="page-header-desc">
+              Convert written text into human-like speech across English and Indian languages using Gnani Timbre.
+            </p>
+          </div>
+
+          <div class="generator-grid">
+            <!-- Left: Text Editor & Settings -->
+            <div class="tts-editor-card">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <label class="field-label" for="tts-text-input">Speech Script / Utterance</label>
+                <span style="font-size: 12px; color: var(--text-tertiary);" id="tts-char-counter">0 characters</span>
+              </div>
+              
+              <textarea class="textarea-commercial" id="tts-text-input" placeholder="Type or paste any text in English, Hindi, or other Indian languages..." style="min-height: 140px;"></textarea>
+
+              <div class="config-group-grid">
+                <div class="field-wrapper">
+                  <label class="field-label" for="tts-model-select">Timbre Model Version</label>
+                  <select class="select-commercial" id="tts-model-select">
+                    <option value="timbre-v3.0" selected>Timbre v3.0 (Expressive / Tags)</option>
+                    <option value="timbre-v2.5">Timbre v2.5 (Standard)</option>
+                  </select>
+                </div>
+
+                <div class="field-wrapper">
+                  <div style="display: flex; justify-content: space-between;">
+                    <label class="field-label" for="tts-speed-slider">Speech Speed</label>
+                    <span style="font-size: 12px; color: var(--accent-primary); font-weight: 600;" id="tts-speed-label">1.0x</span>
+                  </div>
+                  <input type="range" id="tts-speed-slider" min="0.5" max="2.0" step="0.1" value="1.0" style="accent-color: var(--accent-primary); cursor: pointer; margin-top: 8px;">
+                </div>
+              </div>
+
+              <!-- Voice Selection Cards -->
+              <div>
+                <label class="field-label" style="display: block; margin-bottom: 8px;">Select Speaker Profile</label>
+                <div class="voice-catalog-grid" id="voice-catalog-grid">
+                  <!-- Injected via JavaScript with actual catalog -->
+                </div>
+              </div>
+
+              <button class="btn-solid-primary" id="btn-generate-speech" style="margin-top: 8px;">
+                <i data-lucide="play-circle" style="width: 16px; height: 16px;"></i>
+                <span>Synthesize Speech (Timbre)</span>
+              </button>
+            </div>
+
+            <!-- Right: Synthesis Result & Audio Player -->
+            <div class="tts-result-panel">
+              <div style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="disc" style="width: 16px; height: 16px; color: var(--accent-primary);"></i>
+                Audio Output &amp; Waveform
+              </div>
+
+              <div style="background: var(--surface-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; text-align: center; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center;" id="tts-player-wrapper">
+                <div style="color: var(--text-tertiary); font-style: italic; font-size: 13.5px;" id="tts-player-placeholder">
+                  Synthesized audio will be available here for playback and download.
+                </div>
+                
+                <div id="tts-active-audio-box" style="display: none; width: 100%;">
+                  <audio id="tts-audio-element" controls style="width: 100%; height: 42px; margin-bottom: 16px;"></audio>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; color: var(--text-secondary);" id="tts-audio-file-info">WAV • 16 kHz Mono</span>
+                    <a href="#" class="btn-solid-primary" id="btn-download-tts-audio" download style="padding: 6px 14px; font-size: 12.5px;">
+                      <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                      <span>Download .wav</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-card" style="padding: 18px;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary);">
+                  Active Voice Parameters
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;">
+                  <div style="display: flex; justify-content: space-between; color: var(--text-tertiary);">
+                    <span>Selected Voice:</span>
+                    <strong style="color: var(--text-primary);" id="meta-tts-voice">Avinash</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; color: var(--text-tertiary);">
+                    <span>Audio Container:</span>
+                    <strong style="color: var(--text-primary);">Linear PCM (WAV)</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; color: var(--text-tertiary);">
+                    <span>API Endpoint:</span>
+                    <code style="font-family: var(--font-mono); color: var(--accent-primary);">/api/v1/tts/inference</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 5: ACTIVITY HISTORY
+             ================================================================ -->
+        <section class="view-pane" id="view-history">
+          <div class="page-header" style="display: flex; align-items: flex-end; justify-content: space-between;">
+            <div>
+              <h1 class="page-header-title">Activity History</h1>
+              <p class="page-header-desc">
+                Review all audio transcriptions, AI conversations, and voice generations executed during this session.
+              </p>
+            </div>
+            <button class="btn-ghost" id="btn-clear-all-history">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+              <span>Clear Session Log</span>
+            </button>
+          </div>
+
+          <div class="history-table-card">
+            <div id="full-history-list">
+              <!-- History rows dynamically injected -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 6: SETTINGS
+             ================================================================ -->
+        <section class="view-pane" id="view-settings">
+          <div class="page-header">
+            <h1 class="page-header-title">Settings &amp; Environment</h1>
+            <p class="page-header-desc">
+              Manage your connection credentials, base endpoints, and platform runtime settings.
+            </p>
+          </div>
+
+          <div class="settings-section-card">
+            <h2 style="font-size: 16px; margin-bottom: 6px;">Gnani.ai Speech API Connection</h2>
+            <p style="margin-bottom: 20px;">
+              Credentials are loaded securely on the Flask backend from your local <code>.env</code> file. They are never exposed to browser client-side code.
+            </p>
+
+            <div class="field-wrapper" style="margin-bottom: 16px;">
+              <label class="field-label">API Gateway Base URL</label>
+              <input type="text" class="input-commercial" id="settings-base-url" value="https://api.vachana.ai" readonly style="color: var(--text-tertiary);">
+            </div>
+
+            <div class="field-wrapper" style="margin-bottom: 20px;">
+              <label class="field-label">Authentication Status</label>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface-secondary); border: 1px solid var(--border-default); border-radius: var(--radius-sm);">
+                <span class="status-dot" id="settings-auth-dot"></span>
+                <span style="font-size: 13.5px;" id="settings-auth-text">Checking...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section-card">
+            <h2 style="font-size: 16px; margin-bottom: 6px;">AI Assistant LLM Gateway (Groq / OpenAI-compatible)</h2>
+            <p style="margin-bottom: 20px;">
+              Configured via <code>GNANI_EVON_API_URL</code> and <code>GNANI_EVON_API_KEY</code> in your local <code>.env</code> file. Powers high-speed conversational reasoning and script generation.
+            </p>
+
+            <div class="field-wrapper" style="margin-bottom: 16px;">
+              <label class="field-label">Configured LLM Endpoint</label>
+              <input type="text" class="input-commercial" id="settings-evon-url" value="https://api.groq.com/openai/v1" readonly style="color: var(--text-tertiary);">
+            </div>
+            
+            <div class="field-wrapper">
+              <label class="field-label">Active Chat Model</label>
+              <input type="text" class="input-commercial" id="settings-evon-model" value="openai/gpt-oss-120b (Active on Groq)" readonly style="color: var(--accent-emerald);">
+            </div>
+          </div>
+        </section>
+
       </div>
-    </header>
-
-    <!-- Missing Key Alert (dynamically hidden when key is present) -->
-    <div id="api-key-alert" class="alert-box alert-warning" style="display:none;">
-      <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-      </svg>
-      <div>
-        <strong>Gnani API Key is required:</strong> Set your <code>GNANI_API_KEY</code> in the <code>.env</code> file in this folder to perform live speech transcription and synthesis calls through <code>api.vachana.ai</code>.
-      </div>
-    </div>
-
-    <!-- Overview Banner -->
-    <section class="overview-card">
-      <div class="overview-content">
-        <h2>Enterprise Indian & Multilingual Voice Intelligence</h2>
-        <p>VoiceMate AI integrates Gnani.ai's state-of-the-art voice technology stack for accurate speech recognition, contextual understanding, and natural multilingual voice generation.</p>
-        <div class="model-badges">
-          <div class="model-pill">
-            <span class="pill-tag">Prisma v3.0</span>
-            <span class="pill-desc">STT • Automatic Indic Language Detection &amp; Code-mix</span>
-          </div>
-          <div class="model-pill pill-secondary">
-            <span class="pill-tag">Timbre v3.0</span>
-            <span class="pill-desc">TTS • 13 Indic Expressive Voices &amp; Audio Tags</span>
-          </div>
-          <div class="model-pill pill-tertiary">
-            <span class="pill-tag">Evon 30B</span>
-            <span class="pill-desc">Hybrid MoE Reasoning Architecture</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main Dashboard Grid -->
-    <main class="dashboard-grid">
-      <!-- Section 1: Audio Upload & STT Options -->
-      <section class="feature-card col-half">
-        <div class="card-header">
-          <div class="card-icon-bubble">
-            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-          </div>
-          <div class="card-title-group">
-            <h3>Audio Upload</h3>
-            <span>Gnani Prisma Integration</span>
-          </div>
-        </div>
-
-        <input type="file" id="audio-file-input" accept=".wav,.mp3,.ogg,.flac,.m4a,.webm" style="display: none;">
-
-        <div class="dropzone" id="dropzone">
-          <div class="dropzone-inner">
-            <div class="mic-pulse-wrapper">
-              <div class="mic-pulse-ring"></div>
-              <svg style="width:28px;height:28px;fill:currentColor" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-              </svg>
-            </div>
-            <div class="dropzone-text">Click to browse or drag &amp; drop an audio file</div>
-            <div class="dropzone-subtext">Supported: WAV, MP3, OGG, FLAC, M4A (Max 25 MB)</div>
-          </div>
-        </div>
-
-        <div class="selected-file-badge" id="selected-file-badge" style="display: none;">
-          <div class="file-info">
-            <svg style="width:16px;height:16px;fill:var(--accent-purple-light)" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
-            <span id="selected-file-name" style="font-weight: 600;">audio.wav</span>
-            <span id="selected-file-size" style="color:var(--text-muted); font-size:0.8rem;">(0 KB)</span>
-          </div>
-          <button class="btn-icon" id="btn-remove-file" title="Remove file">✕</button>
-        </div>
-
-        <div class="form-group-row">
-          <div class="form-field">
-            <label class="form-label" for="prisma-model">Prisma Model Engine</label>
-            <select class="form-select" id="prisma-model">
-              <option value="prisma-v2.5" selected>Prisma v2.5 (Stable / Full Sentence Coverage)</option>
-              <option value="prisma-v3.0">Prisma v3.0 (Multilingual Indic / Word Boosting)</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="prisma-lang">Target Language Hint</label>
-            <select class="form-select" id="prisma-lang">
-              <option value="en-IN" selected>English (en-IN)</option>
-              <option value="indic-auto">Automatic Indic Detection (indic-auto - v3.0)</option>
-              <option value="hi-IN">Hindi (hi-IN)</option>
-              <option value="ta-IN">Tamil (ta-IN)</option>
-              <option value="te-IN">Telugu (te-IN)</option>
-              <option value="kn-IN">Kannada (kn-IN)</option>
-              <option value="bn-IN">Bengali (bn-IN)</option>
-              <option value="mr-IN">Marathi (mr-IN)</option>
-              <option value="gu-IN">Gujarati (gu-IN)</option>
-              <option value="ml-IN">Malayalam (ml-IN)</option>
-              <option value="pa-IN">Punjabi (pa-IN)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group-row" style="margin-top: 12px;">
-          <div class="form-field">
-            <label class="form-label" for="prisma-format">Output Format</label>
-            <select class="form-select" id="prisma-format">
-              <option value="transcribe" selected>Transcribe (Clean text with ITN numbers)</option>
-              <option value="verbatim">Verbatim (Exact with filler words)</option>
-              <option value="codemix">Code-mix (Retains original native scripts)</option>
-              <option value="transliterate">Transliterate (Latin/English characters)</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="prisma-keyterms">Keyterms / Word Boost (Optional)</label>
-            <input type="text" class="form-input" id="prisma-keyterms" placeholder="e.g. VoiceMate AI, Gnani, Timbre, Prisma">
-          </div>
-        </div>
-
-        <div class="waveform-container" id="stt-waveform">
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-        </div>
-
-        <button class="btn-primary" id="btn-transcribe" disabled>
-          <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-          Convert Speech to Text (Prisma)
-        </button>
-      </section>
-
-      <!-- Section 2: Transcription Result -->
-      <section class="feature-card col-half">
-        <div class="card-header" style="justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="card-icon-bubble">
-              <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-            </div>
-            <div class="card-title-group">
-              <h3>Transcription Result</h3>
-              <span>Speech Output (Original &amp; Editable)</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-secondary" id="btn-toggle-edit" style="display:none;" title="Enable inline editing">✏️ Edit</button>
-            <button class="btn-secondary" id="btn-revert-original" style="display:none;" title="Revert to original API transcription">↺ Revert</button>
-          </div>
-        </div>
-
-        <div class="result-display-box" style="flex: 1;">
-          <div id="transcript-container" style="display:flex; flex-direction:column; gap:10px; height:100%;">
-            <div id="transcript-output">
-              <span class="result-placeholder">Uploaded speech transcription will appear here...</span>
-            </div>
-            <textarea id="transcript-edit-input" class="form-textarea" style="display:none; flex:1; width:100%; min-height:100px;"></textarea>
-          </div>
-          <div class="result-meta-row">
-            <span id="transcript-status">Status: Idle</span>
-            <div style="display:flex; flex-wrap:wrap; gap:6px;">
-              <button class="btn-secondary" id="btn-copy-transcript" style="display:none;">📋 Copy</button>
-              <button class="btn-secondary" id="btn-download-transcript" style="display:none;">💾 Download .txt</button>
-              <button class="btn-secondary" id="btn-send-to-ai" style="display:none;">Send to AI ➔</button>
-              <button class="btn-secondary" id="btn-send-to-tts" style="display:none;">Send to TTS ➔</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section 3: AI Assistant (Evon 30B) -->
-      <section class="feature-card col-half">
-        <div class="card-header">
-          <div class="card-icon-bubble">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-          </div>
-          <div class="card-title-group">
-            <h3>AI Assistant</h3>
-            <span>Evon 30B Reasoning Model</span>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label" for="ai-prompt-input">Ask a Question / Conversational Prompt</label>
-          <textarea class="form-textarea" id="ai-prompt-input" placeholder="Type your query here or send from transcribed speech above..."></textarea>
-        </div>
-
-        <button class="btn-primary" id="btn-ask-ai">
-          <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-          Generate Response (Evon 30B)
-        </button>
-
-        <div class="result-display-box" style="margin-top: 16px; min-height: 140px;">
-          <div id="ai-response-output">
-            <span class="result-placeholder">AI generated response will appear here...</span>
-          </div>
-          <div class="result-meta-row">
-            <span id="ai-status">Status: Idle</span>
-            <div style="display:flex; gap:6px;">
-              <button class="btn-secondary" id="btn-copy-ai" style="display:none;">Copy</button>
-              <button class="btn-secondary" id="btn-ai-to-tts" style="display:none;">Speak with Timbre ➔</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section 4: Text-to-Speech (Gnani Timbre) -->
-      <section class="feature-card col-half">
-        <div class="card-header">
-          <div class="card-icon-bubble">
-            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-          </div>
-          <div class="card-title-group">
-            <h3>Text-to-Speech</h3>
-            <span>Gnani Timbre Integration</span>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label" for="tts-text-input">Text to Synthesize</label>
-          <textarea class="form-textarea" id="tts-text-input" placeholder="Enter text in English or any Indian language to convert into natural speech..."></textarea>
-        </div>
-
-        <div class="form-group-row">
-          <div class="form-field">
-            <label class="form-label" for="timbre-voice">Voice</label>
-            <select class="form-select" id="timbre-voice">
-              <optgroup label="Timbre v3.0 Multilingual Voices">
-                <option value="Avinash" selected>Avinash (Default)</option>
-                <option value="Chetana">Chetana</option>
-                <option value="Lakshmi">Lakshmi</option>
-                <option value="Devansh">Devansh</option>
-                <option value="Harshad">Harshad</option>
-                <option value="Kalpana">Kalpana</option>
-                <option value="Prakash">Prakash</option>
-                <option value="Riyaa">Riyaa</option>
-                <option value="Shivani">Shivani</option>
-                <option value="Shubham">Shubham</option>
-                <option value="Tarika">Tarika</option>
-                <option value="Vasudha">Vasudha</option>
-                <option value="Yashraj">Yashraj</option>
-              </optgroup>
-              <optgroup label="Timbre v2.5 Voices">
-                <option value="Pranav">Pranav</option>
-                <option value="Nalini">Nalini</option>
-                <option value="Kaveri">Kaveri</option>
-                <option value="Deepak">Deepak</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="timbre-model">Model</label>
-            <select class="form-select" id="timbre-model">
-              <option value="timbre-v3.0" selected>Timbre v3.0 (Expressive / Tags)</option>
-              <option value="timbre-v2.5">Timbre v2.5 (Standard)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-field" style="margin-top:12px;">
-          <div style="display:flex; justify-content:space-between;">
-            <label class="form-label" for="timbre-speed">Speed</label>
-            <span id="timbre-speed-val" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">1.0x</span>
-          </div>
-          <input type="range" id="timbre-speed" min="0.5" max="2.0" step="0.1" value="1.0" style="accent-color: var(--accent-purple-light); cursor:pointer;">
-        </div>
-
-        <div class="waveform-container" id="tts-waveform">
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-        </div>
-
-        <button class="btn-primary" id="btn-synthesize">
-          <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-          Convert Text to Speech (Timbre)
-        </button>
-
-        <div class="audio-player-container" id="tts-player-container" style="display:none;">
-          <audio id="tts-audio-player" controls></audio>
-          <div class="audio-actions-row">
-            <a href="#" class="btn-secondary" id="tts-download-link" download="synthesized_speech.wav">
-              <svg style="width:14px;height:14px;fill:currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-              Download Audio
-            </a>
-          </div>
-        </div>
-        <div style="margin-top: 10px;">
-          <span id="tts-status" style="font-size:0.8rem; color:var(--text-muted);">Status: Ready</span>
-        </div>
-      </section>
-
-      <!-- Section 5: Recent Activity -->
-      <section class="feature-card col-full">
-        <div class="card-header" style="justify-content: space-between;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div class="card-icon-bubble">
-              <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-            </div>
-            <div class="card-title-group">
-              <h3>Recent Session Activity</h3>
-              <span>Session History</span>
-            </div>
-          </div>
-          <button class="btn-secondary" id="btn-clear-history">Clear History</button>
-        </div>
-
-        <div class="activity-list" id="activity-list">
-          <span class="result-placeholder">No activity recorded yet. Try transcribing an audio file or generating speech!</span>
-        </div>
-      </section>
     </main>
-
-    <footer class="app-footer">
-      VoiceMate AI • Built with Flask &amp; Gnani.ai Speech Technologies (Prisma STT, Timbre TTS &amp; Evon 30B Architecture)
-    </footer>
   </div>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <!-- Modern Commercial Application Controller -->
+  <script src="{{ url_for('static', filename='script.js') }}?v=2.4.5"></script>
 </body>
 </html>
-

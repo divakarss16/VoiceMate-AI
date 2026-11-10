@@ -48,7 +48,7 @@ def index():
 def config_status():
     """Returns the configuration and readiness status of services."""
     has_api_key = bool(os.getenv("GNANI_API_KEY", "").strip())
-    evon_configured = evon_service.is_configured()
+    ai_configured = evon_service.is_configured()
     
     return jsonify({
         "gnani_api_key_configured": has_api_key,
@@ -64,10 +64,12 @@ def config_status():
                 "type": "Text-to-Speech (TTS)",
                 "status": "Ready (API Key Present)" if has_api_key else "Missing API Key"
             },
-            "evon": {
-                "name": "Evon 30B (A3B)",
-                "type": "Open-weights Reasoning LLM",
-                "status": "Configured Endpoint" if evon_configured else "Self-host / Endpoint Required"
+            "ai_assistant": {
+                "name": f"VoiceMate AI ({evon_service.model_name})",
+                "type": "Conversational Reasoning LLM",
+                "provider": evon_service.provider,
+                "model": evon_service.model_name,
+                "status": "Ready (Groq Connected)" if ai_configured else "Missing API Key"
             }
         }
     })
@@ -117,18 +119,91 @@ def transcribe():
     status_code = 200 if result.get("success") else result.get("status_code", 400)
     return jsonify(result), status_code
 
+def prepare_tts_text(raw_text, max_chars=1200):
+    """
+    Cleans markdown formatting, code block markers, and non-phonetic symbols
+    while preserving the complete natural wording of the AI answer
+    so Gnani Timbre synthesizes the exact spoken response.
+    """
+    if not raw_text:
+        return ""
+    import re
+    # Convert code blocks to a natural spoken mention so technical answers flow seamlessly
+    text = re.sub(r'```(?:python|javascript|html|css|bash|json|sql)?\s*([\s\S]*?)```', r' \1 ', raw_text)
+    # Remove inline backticks `...`
+    text = re.sub(r'`([^`]+)`', r'\1', text)
+    # Remove markdown header hashes
+    text = re.sub(r'#+\s*', '', text)
+    # Remove markdown bold/italics symbols (*, _, ~) without deleting the words
+    text = re.sub(r'[*_~]', '', text)
+    # Convert links [text](url) to just text
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+    # Normalize excessive newlines and spaces
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    # Only if text exceeds Timbre's safe single-batch limit, slice at a natural sentence boundary
+    if len(text) > max_chars:
+        boundary = text[:max_chars].rfind('.')
+        if boundary > 300:
+            text = text[:boundary + 1]
+        else:
+            text = text[:max_chars]
+    return text
+
 @app.route("/api/ask", methods=["POST"])
 def ask_ai():
-    """Endpoint to process AI questions using Evon 30B."""
+    """Endpoint to process AI questions using Groq LLM with optional automatic voice explanation."""
     data = request.get_json(silent=True) or {}
     prompt = data.get("prompt", "").strip()
+    history = data.get("history", []) # list of {"role": "user"|"assistant", "content": "..."}
+    generate_voice = data.get("generate_voice", True) # automatic voice explanation
+    voice = data.get("voice", "Avinash")
+    speed = float(data.get("speed", 1.0))
 
     if not prompt:
         return jsonify({"success": False, "error": "Please provide a valid question or prompt."}), 400
 
-    result = evon_service.generate_response(prompt=prompt)
-    status_code = 200 if result.get("success") else result.get("status_code", 400)
-    return jsonify(result), status_code
+    # 1. Generate text response with Groq LLM
+    result = evon_service.generate_response(prompt=prompt, conversation_history=history)
+    if not result.get("success"):
+        status_code = result.get("status_code", 400)
+        return jsonify(result), status_code
+
+    ai_text_response = result.get("response", "")
+
+    # 2. Automatically generate voice explanation via Gnani Timbre if requested
+    audio_data = None
+    if generate_voice and ai_text_response and ai_text_response.strip():
+        try:
+            tts_text = prepare_tts_text(ai_text_response)
+            if tts_text:
+                logger.info(f"Generating automatic voice explanation ({len(tts_text)} chars) with voice='{voice}'")
+                tts_result = timbre_service.synthesize_speech(
+                    text=tts_text,
+                    voice=voice,
+                    model="timbre-v3.0",
+                    speed=speed
+                )
+                if tts_result.get("success"):
+                    audio_data = {
+                        "url": tts_result.get("url"),
+                        "filename": tts_result.get("filename"),
+                        "voice": tts_result.get("voice", voice),
+                        "model": tts_result.get("model", "timbre-v3.0")
+                    }
+                else:
+                    logger.warning(f"Voice generation failed: {tts_result.get('error')}")
+                    audio_data = {
+                        "error": tts_result.get("error", "Unable to synthesize speech audio.")
+                    }
+        except Exception as e:
+            logger.error(f"Error during automatic voice generation: {e}")
+            audio_data = {"error": str(e)}
+
+    # Attach audio info to response payload
+    result["audio"] = audio_data
+
+    return jsonify(result), 200
 
 @app.route("/api/synthesize", methods=["POST"])
 def synthesize():

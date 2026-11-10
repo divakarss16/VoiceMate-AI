@@ -1,14 +1,8 @@
 """
-Evon 30B AI Reasoning and Response Generation Service.
+VoiceMate AI Assistant / LLM Reasoning Service.
 
-Evon (gnani-evon-v3.3-30B-A3B) is Gnani.ai's open-weights hybrid MoE LLM.
-Unlike Prisma and Timbre which have public managed cloud endpoints on api.vachana.ai,
-Evon 30B is released as an open-weights model on Hugging Face for self-hosted or dedicated inference.
-
-This service connects to any OpenAI-compatible or dedicated inference endpoint hosting Evon 30B
-(configured via GNANI_EVON_API_URL and GNANI_EVON_API_KEY).
-If no endpoint is configured or available, it reports the precise status and architecture details
-transparently without faking responses.
+Supports Groq's high-speed OpenAI-compatible chat completions API
+(or any custom OpenAI-compatible endpoint configured in .env).
 """
 import os
 import requests
@@ -16,24 +10,49 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+SYSTEM_PROMPT = """You are VoiceMate AI Assistant, an advanced, highly intelligent conversational partner integrated into the VoiceMate AI voice platform.
+
+Guidelines for your responses:
+1. Tone & Clarity: Be engaging, polite, natural, and helpful. Use clear, accessible English. When explaining technical topics or complex phenomena, explain concepts in simple, intuitive terms first before diving deeper.
+2. Structure & Depth:
+   - For technical, procedural, or coding questions, provide structured, step-by-step explanations with well-commented, practical code examples.
+   - Adjust your depth to match the user's intent: concise and direct for quick questions, comprehensive and well-organized for deep topics.
+3. Natural Voice Compatibility: Your response will be read aloud by an automated text-to-speech voice engine (Gnani Timbre). 
+   - Keep opening thoughts clean and easy to listen to.
+   - Avoid excessive ASCII walls, unnecessary repetition, or clunky filler phrases.
+4. Truthfulness & Accuracy: Never fabricate information, library versions, or statistics. If you are uncertain or the question lacks context, admit it openly and ask for clarification.
+5. Conversational Continuity: Maintain context across follow-up turns in the conversation."""
+
 class EvonService:
-    def __init__(self, endpoint_url=None, api_key=None):
-        self.endpoint_url = endpoint_url or os.getenv("GNANI_EVON_API_URL", "").strip()
+    def __init__(self, endpoint_url=None, api_key=None, model_name=None):
+        raw_url = (endpoint_url or os.getenv("GNANI_EVON_API_URL", "https://api.groq.com/openai/v1")).strip().rstrip("/")
+        # Ensure completions path is properly formatted
+        if not raw_url.endswith("/chat/completions"):
+            if raw_url.endswith("/v1"):
+                self.endpoint_url = f"{raw_url}/chat/completions"
+            else:
+                self.endpoint_url = f"{raw_url}/chat/completions"
+        else:
+            self.endpoint_url = raw_url
+
         self.api_key = api_key or os.getenv("GNANI_EVON_API_KEY", "").strip()
-        self.model_name = "gnani-evon-v3.3-30B-A3B"
+        # Default verified active chat model on Groq
+        self.model_name = model_name or os.getenv("GNANI_AI_MODEL", "openai/gpt-oss-120b").strip()
+        self.provider = "Groq (OpenAI-compatible)" if "groq.com" in self.endpoint_url else "OpenAI-compatible Endpoint"
 
     def is_configured(self):
-        return bool(self.endpoint_url)
+        return bool(self.api_key and self.endpoint_url)
 
-    def generate_response(self, prompt, system_instruction=None, max_tokens=512, temperature=0.7):
+    def generate_response(self, prompt, conversation_history=None, system_instruction=None, max_tokens=1024, temperature=0.7):
         """
-        Generate reasoning/response from Evon 30B inference endpoint.
+        Generate chat response using Groq / OpenAI-compatible chat completions.
         
         :param prompt: User question/prompt
-        :param system_instruction: System prompt to steer response
+        :param conversation_history: List of previous dicts: [{"role": "user"|"assistant", "content": "..."}]
+        :param system_instruction: System prompt to steer response (defaults to SYSTEM_PROMPT)
         :param max_tokens: Maximum tokens to generate
         :param temperature: Sampling temperature
-        :return: dict with success, response_text, model, or structured error message.
+        :return: dict with success, response, model, or structured error message.
         """
         if not prompt or not prompt.strip():
             return {
@@ -42,35 +61,33 @@ class EvonService:
                 "status_code": 400
             }
 
-        if not self.endpoint_url:
+        if not self.api_key:
             return {
                 "success": False,
-                "error": (
-                    "Evon 30B is an open-weights model (gnani/gnani-evon-v3.3-30B-A3B on Hugging Face) "
-                    "and does not have a default managed public cloud REST endpoint like Prisma and Timbre. "
-                    "To enable Evon 30B reasoning, host the model weights (via vLLM, Ollama, or llama.cpp) "
-                    "and provide GNANI_EVON_API_URL in your .env file."
-                ),
-                "is_model_hosted": False,
-                "model": self.model_name,
-                "status_code": 501
+                "error": "AI Assistant API Key is missing. Please set GNANI_EVON_API_KEY in your .env file.",
+                "is_configured": False,
+                "status_code": 401
             }
 
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
         }
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
-            headers["X-API-Key-ID"] = self.api_key
 
         messages = []
-        if system_instruction:
-            messages.append({"role": "system", "content": system_instruction})
-        else:
-            messages.append({
-                "role": "system",
-                "content": "You are VoiceMate AI, a helpful, polite, and intelligent voice assistant powered by Gnani AI."
-            })
+        # Inject strong system instruction
+        active_system = system_instruction or SYSTEM_PROMPT
+        messages.append({"role": "system", "content": active_system})
+
+        # Inject conversation history (sanitize to user & assistant roles only)
+        if conversation_history and isinstance(conversation_history, list):
+            for msg in conversation_history[-8:]: # keep last 8 turns for optimal context window
+                role = msg.get("role")
+                content = msg.get("content", "").strip()
+                if role in ("user", "assistant") and content:
+                    messages.append({"role": role, "content": content})
+
+        # Append current user prompt
         messages.append({"role": "user", "content": prompt.strip()})
 
         payload = {
@@ -81,19 +98,20 @@ class EvonService:
         }
 
         try:
-            logger.info(f"Dispatching inference request to Evon 30B endpoint: {self.endpoint_url}")
+            logger.info(f"Dispatching AI chat completion to {self.endpoint_url} using model '{self.model_name}' (messages: {len(messages)})")
             response = requests.post(
                 self.endpoint_url,
                 headers=headers,
                 json=payload,
-                timeout=60
+                timeout=45
             )
 
             if response.status_code == 200:
                 resp_json = response.json()
-                # Support OpenAI format or direct response format
+                answer = ""
                 if "choices" in resp_json and len(resp_json["choices"]) > 0:
-                    answer = resp_json["choices"][0].get("message", {}).get("content", "")
+                    choice = resp_json["choices"][0]
+                    answer = choice.get("message", {}).get("content", "")
                 elif "response" in resp_json:
                     answer = resp_json["response"]
                 elif "generated_text" in resp_json:
@@ -105,40 +123,44 @@ class EvonService:
                     "success": True,
                     "response": answer,
                     "model": self.model_name,
-                    "is_model_hosted": True,
-                    "raw": resp_json
+                    "provider": self.provider,
+                    "is_configured": True
                 }
             else:
                 error_detail = response.text
                 try:
                     error_json = response.json()
-                    error_detail = error_json.get("error", {}).get("message") or error_json.get("message") or response.text
+                    error_detail = (
+                        error_json.get("error", {}).get("message")
+                        or error_json.get("message")
+                        or response.text
+                    )
                 except Exception:
                     pass
 
+                logger.error(f"AI Assistant API error ({response.status_code}): {error_detail}")
                 return {
                     "success": False,
-                    "error": f"Evon 30B inference endpoint returned error ({response.status_code}): {error_detail}",
-                    "is_model_hosted": True,
+                    "error": f"AI Assistant API error ({response.status_code}): {error_detail}",
+                    "is_configured": True,
                     "status_code": response.status_code
                 }
 
         except requests.exceptions.Timeout:
             return {
                 "success": False,
-                "error": "Evon 30B inference request timed out after 60 seconds.",
+                "error": "AI Assistant API request timed out after 45 seconds.",
                 "status_code": 504
             }
         except requests.exceptions.RequestException as e:
             return {
                 "success": False,
-                "error": f"Unable to reach Evon 30B inference endpoint at {self.endpoint_url}: {str(e)}",
+                "error": f"Unable to reach AI Assistant endpoint at {self.endpoint_url}: {str(e)}",
                 "status_code": 502
             }
         except Exception as e:
             return {
                 "success": False,
-                "error": f"Unexpected error during Evon 30B inference: {str(e)}",
+                "error": f"Unexpected error during AI generation: {str(e)}",
                 "status_code": 500
             }
-
