@@ -1,0 +1,12 @@
+# Environment Variables for VoiceMate AI (Gnani AI Integration)
+.env
+.env.local
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+uploads/
+generated_audio/
+.vscode/
+.idea/
+

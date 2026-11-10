@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoiceMate AI – Intelligent Multilingual Voice Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo-glow">
+          <svg class="logo-icon" viewBox="0 0 24 24">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">VoiceMate AI</h1>
+          <p class="brand-subtitle">Intelligent Multilingual Voice Assistant powered by Gnani.ai</p>
+        </div>
+      </div>
+      <div class="header-status-badge">
+        <span class="status-dot" id="api-status-dot"></span>
+        <span id="api-status-text">Checking API...</span>
+      </div>
+    </header>
+
+    <!-- Missing Key Alert (dynamically hidden when key is present) -->
+    <div id="api-key-alert" class="alert-box alert-warning" style="display:none;">
+      <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+      </svg>
+      <div>
+        <strong>Gnani API Key is required:</strong> Set your <code>GNANI_API_KEY</code> in the <code>.env</code> file in this folder to perform live speech transcription and synthesis calls through <code>api.vachana.ai</code>.
+      </div>
+    </div>
+
+    <!-- Overview Banner -->
+    <section class="overview-card">
+      <div class="overview-content">
+        <h2>Enterprise Indian & Multilingual Voice Intelligence</h2>
+        <p>VoiceMate AI integrates Gnani.ai's state-of-the-art voice technology stack for accurate speech recognition, contextual understanding, and natural multilingual voice generation.</p>
+        <div class="model-badges">
+          <div class="model-pill">
+            <span class="pill-tag">Prisma v3.0</span>
+            <span class="pill-desc">STT • Automatic Indic Language Detection &amp; Code-mix</span>
+          </div>
+          <div class="model-pill pill-secondary">
+            <span class="pill-tag">Timbre v3.0</span>
+            <span class="pill-desc">TTS • 13 Indic Expressive Voices &amp; Audio Tags</span>
+          </div>
+          <div class="model-pill pill-tertiary">
+            <span class="pill-tag">Evon 30B</span>
+            <span class="pill-desc">Hybrid MoE Reasoning Architecture</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Grid -->
+    <main class="dashboard-grid">
+      <!-- Section 1: Audio Upload & STT Options -->
+      <section class="feature-card col-half">
+        <div class="card-header">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+          </div>
+          <div class="card-title-group">
+            <h3>Audio Upload</h3>
+            <span>Gnani Prisma Integration</span>
+          </div>
+        </div>
+
+        <input type="file" id="audio-file-input" accept=".wav,.mp3,.ogg,.flac,.m4a,.webm" style="display: none;">
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-inner">
+            <div class="mic-pulse-wrapper">
+              <div class="mic-pulse-ring"></div>
+              <svg style="width:28px;height:28px;fill:currentColor" viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+            </div>
+            <div class="dropzone-text">Click to browse or drag &amp; drop an audio file</div>
+            <div class="dropzone-subtext">Supported: WAV, MP3, OGG, FLAC, M4A (Max 25 MB)</div>
+          </div>
+        </div>
+
+        <div class="selected-file-badge" id="selected-file-badge" style="display: none;">
+          <div class="file-info">
+            <svg style="width:16px;height:16px;fill:var(--accent-purple-light)" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            <span id="selected-file-name" style="font-weight: 600;">audio.wav</span>
+            <span id="selected-file-size" style="color:var(--text-muted); font-size:0.8rem;">(0 KB)</span>
+          </div>
+          <button class="btn-icon" id="btn-remove-file" title="Remove file">✕</button>
+        </div>
+
+        <div class="form-group-row">
+          <div class="form-field">
+            <label class="form-label" for="prisma-model">Prisma Model Engine</label>
+            <select class="form-select" id="prisma-model">
+              <option value="prisma-v2.5" selected>Prisma v2.5 (Stable / Full Sentence Coverage)</option>
+              <option value="prisma-v3.0">Prisma v3.0 (Multilingual Indic / Word Boosting)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="prisma-lang">Target Language Hint</label>
+            <select class="form-select" id="prisma-lang">
+              <option value="en-IN" selected>English (en-IN)</option>
+              <option value="indic-auto">Automatic Indic Detection (indic-auto - v3.0)</option>
+              <option value="hi-IN">Hindi (hi-IN)</option>
+              <option value="ta-IN">Tamil (ta-IN)</option>
+              <option value="te-IN">Telugu (te-IN)</option>
+              <option value="kn-IN">Kannada (kn-IN)</option>
+              <option value="bn-IN">Bengali (bn-IN)</option>
+              <option value="mr-IN">Marathi (mr-IN)</option>
+              <option value="gu-IN">Gujarati (gu-IN)</option>
+              <option value="ml-IN">Malayalam (ml-IN)</option>
+              <option value="pa-IN">Punjabi (pa-IN)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group-row" style="margin-top: 12px;">
+          <div class="form-field">
+            <label class="form-label" for="prisma-format">Output Format</label>
+            <select class="form-select" id="prisma-format">
+              <option value="transcribe" selected>Transcribe (Clean text with ITN numbers)</option>
+              <option value="verbatim">Verbatim (Exact with filler words)</option>
+              <option value="codemix">Code-mix (Retains original native scripts)</option>
+              <option value="transliterate">Transliterate (Latin/English characters)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="prisma-keyterms">Keyterms / Word Boost (Optional)</label>
+            <input type="text" class="form-input" id="prisma-keyterms" placeholder="e.g. VoiceMate AI, Gnani, Timbre, Prisma">
+          </div>
+        </div>
+
+        <div class="waveform-container" id="stt-waveform">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <button class="btn-primary" id="btn-transcribe" disabled>
+          <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+          Convert Speech to Text (Prisma)
+        </button>
+      </section>
+
+      <!-- Section 2: Transcription Result -->
+      <section class="feature-card col-half">
+        <div class="card-header" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="card-icon-bubble">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            </div>
+            <div class="card-title-group">
+              <h3>Transcription Result</h3>
+              <span>Speech Output (Original &amp; Editable)</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary" id="btn-toggle-edit" style="display:none;" title="Enable inline editing">✏️ Edit</button>
+            <button class="btn-secondary" id="btn-revert-original" style="display:none;" title="Revert to original API transcription">↺ Revert</button>
+          </div>
+        </div>
+
+        <div class="result-display-box" style="flex: 1;">
+          <div id="transcript-container" style="display:flex; flex-direction:column; gap:10px; height:100%;">
+            <div id="transcript-output">
+              <span class="result-placeholder">Uploaded speech transcription will appear here...</span>
+            </div>
+            <textarea id="transcript-edit-input" class="form-textarea" style="display:none; flex:1; width:100%; min-height:100px;"></textarea>
+          </div>
+          <div class="result-meta-row">
+            <span id="transcript-status">Status: Idle</span>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <button class="btn-secondary" id="btn-copy-transcript" style="display:none;">📋 Copy</button>
+              <button class="btn-secondary" id="btn-download-transcript" style="display:none;">💾 Download .txt</button>
+              <button class="btn-secondary" id="btn-send-to-ai" style="display:none;">Send to AI ➔</button>
+              <button class="btn-secondary" id="btn-send-to-tts" style="display:none;">Send to TTS ➔</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: AI Assistant (Evon 30B) -->
+      <section class="feature-card col-half">
+        <div class="card-header">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          </div>
+          <div class="card-title-group">
+            <h3>AI Assistant</h3>
+            <span>Evon 30B Reasoning Model</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="ai-prompt-input">Ask a Question / Conversational Prompt</label>
+          <textarea class="form-textarea" id="ai-prompt-input" placeholder="Type your query here or send from transcribed speech above..."></textarea>
+        </div>
+
+        <button class="btn-primary" id="btn-ask-ai">
+          <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          Generate Response (Evon 30B)
+        </button>
+
+        <div class="result-display-box" style="margin-top: 16px; min-height: 140px;">
+          <div id="ai-response-output">
+            <span class="result-placeholder">AI generated response will appear here...</span>
+          </div>
+          <div class="result-meta-row">
+            <span id="ai-status">Status: Idle</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-secondary" id="btn-copy-ai" style="display:none;">Copy</button>
+              <button class="btn-secondary" id="btn-ai-to-tts" style="display:none;">Speak with Timbre ➔</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Text-to-Speech (Gnani Timbre) -->
+      <section class="feature-card col-half">
+        <div class="card-header">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </div>
+          <div class="card-title-group">
+            <h3>Text-to-Speech</h3>
+            <span>Gnani Timbre Integration</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="tts-text-input">Text to Synthesize</label>
+          <textarea class="form-textarea" id="tts-text-input" placeholder="Enter text in English or any Indian language to convert into natural speech..."></textarea>
+        </div>
+
+        <div class="form-group-row">
+          <div class="form-field">
+            <label class="form-label" for="timbre-voice">Voice</label>
+            <select class="form-select" id="timbre-voice">
+              <optgroup label="Timbre v3.0 Multilingual Voices">
+                <option value="Avinash" selected>Avinash (Default)</option>
+                <option value="Chetana">Chetana</option>
+                <option value="Lakshmi">Lakshmi</option>
+                <option value="Devansh">Devansh</option>
+                <option value="Harshad">Harshad</option>
+                <option value="Kalpana">Kalpana</option>
+                <option value="Prakash">Prakash</option>
+                <option value="Riyaa">Riyaa</option>
+                <option value="Shivani">Shivani</option>
+                <option value="Shubham">Shubham</option>
+                <option value="Tarika">Tarika</option>
+                <option value="Vasudha">Vasudha</option>
+                <option value="Yashraj">Yashraj</option>
+              </optgroup>
+              <optgroup label="Timbre v2.5 Voices">
+                <option value="Pranav">Pranav</option>
+                <option value="Nalini">Nalini</option>
+                <option value="Kaveri">Kaveri</option>
+                <option value="Deepak">Deepak</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="timbre-model">Model</label>
+            <select class="form-select" id="timbre-model">
+              <option value="timbre-v3.0" selected>Timbre v3.0 (Expressive / Tags)</option>
+              <option value="timbre-v2.5">Timbre v2.5 (Standard)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-top:12px;">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="form-label" for="timbre-speed">Speed</label>
+            <span id="timbre-speed-val" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">1.0x</span>
+          </div>
+          <input type="range" id="timbre-speed" min="0.5" max="2.0" step="0.1" value="1.0" style="accent-color: var(--accent-purple-light); cursor:pointer;">
+        </div>
+
+        <div class="waveform-container" id="tts-waveform">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <button class="btn-primary" id="btn-synthesize">
+          <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          Convert Text to Speech (Timbre)
+        </button>
+
+        <div class="audio-player-container" id="tts-player-container" style="display:none;">
+          <audio id="tts-audio-player" controls></audio>
+          <div class="audio-actions-row">
+            <a href="#" class="btn-secondary" id="tts-download-link" download="synthesized_speech.wav">
+              <svg style="width:14px;height:14px;fill:currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+              Download Audio
+            </a>
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <span id="tts-status" style="font-size:0.8rem; color:var(--text-muted);">Status: Ready</span>
+        </div>
+      </section>
+
+      <!-- Section 5: Recent Activity -->
+      <section class="feature-card col-full">
+        <div class="card-header" style="justify-content: space-between;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="card-icon-bubble">
+              <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            </div>
+            <div class="card-title-group">
+              <h3>Recent Session Activity</h3>
+              <span>Session History</span>
+            </div>
+          </div>
+          <button class="btn-secondary" id="btn-clear-history">Clear History</button>
+        </div>
+
+        <div class="activity-list" id="activity-list">
+          <span class="result-placeholder">No activity recorded yet. Try transcribing an audio file or generating speech!</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      VoiceMate AI • Built with Flask &amp; Gnani.ai Speech Technologies (Prisma STT, Timbre TTS &amp; Evon 30B Architecture)
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
